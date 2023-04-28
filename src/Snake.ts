@@ -1,8 +1,17 @@
-import { config, GRID_SIZE } from './config.js';
-import { snapToGrid } from './utility.js';
+import { Scene } from 'phaser';
+import { config, GRID_SIZE } from './config';
+import { snapToGrid } from './utility';
 
 export class Snake {
-  constructor(scene) {
+  scene
+  body
+  direction
+  growAmount
+  moveDelay
+  lastMoveTime
+  alive
+
+  constructor(scene: Scene) {
     this.scene = scene;
     this.body = [];
     this.direction = Phaser.Math.Vector2.RIGHT;
@@ -24,7 +33,7 @@ export class Snake {
     }
   }
 
-  update(time) {
+  update(time: number): boolean {
     if (time >= this.lastMoveTime + this.moveDelay) {
       this.lastMoveTime = time;
       return this.move();
@@ -54,7 +63,8 @@ export class Snake {
       }
     }
 
-    let last = this.body.pop();
+    const last = this.body.pop();
+    if (!last) throw new Error("Snake has empty body");
     last.setPosition(targetX, targetY);
     this.body.unshift(last);
 
@@ -76,8 +86,7 @@ export class Snake {
     this.growAmount += 1;
   }
 
-  collideWithFood(food) {
-    const head = this.body[0];
-    return head.x === food.x && head.y === food.y;
+  collideWithFood(food: { x: number; y: number; }): boolean {
+    return this.body[0].x === food.x && this.body[0].y === food.y;
   }
 }

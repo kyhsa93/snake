@@ -1,13 +1,21 @@
-import { config, GRID_SIZE } from "./config.js";
+import { Scene, Display } from 'phaser';
+
+import { config, GRID_SIZE } from "./config";
+import { Snake } from './Snake';
 
 export class Food {
-  constructor(scene) {
+  scene
+  x
+  y
+  sprite
+
+  constructor(scene: Scene) {
     this.scene = scene;
     this.x = 0;
     this.y = 0;
 
     this.sprite = this.scene.add
-      .rectangle(this.x, this.y, GRID_SIZE, GRID_SIZE, Phaser.Display.Color.RandomRGB().color32)
+      .rectangle(this.x, this.y, GRID_SIZE, GRID_SIZE, Display.Color.RandomRGB().color32)
       .setOrigin(0);
 
     this.randomize();
@@ -20,11 +28,11 @@ export class Food {
     this.x = Math.floor(Math.random() * maxGridX) * GRID_SIZE;
     this.y = Math.floor(Math.random() * maxGridY) * GRID_SIZE;
 
-    this.sprite.setFillStyle(Phaser.Display.Color.RandomRGB().color32);
+    this.sprite.setFillStyle(Display.Color.RandomRGB().color32);
     this.sprite.setPosition(this.x, this.y);
   }
 
-  avoidOverlap(snake) {
+  avoidOverlap(snake: Snake) {
     let overlapping = true;
 
     while (overlapping) {
