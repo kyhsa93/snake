@@ -5,7 +5,7 @@ module.exports = {
   entry: './src/main.ts',
   output: {
     filename: 'bundle.js',
-    path: __dirname + '/dist',
+    path: __dirname + '/docs',
     environment: {
       module: true,
     },
@@ -29,7 +29,7 @@ module.exports = {
     }),
   ],
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, 'docs'),
     compress: true,
     port: 9000,
   },
