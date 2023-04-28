@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+    <script>
+        const GRID_SIZE = 16;
+
+        class BootScene extends Phaser.Scene {
+          constructor() {
+            super({ key: 'BootScene' });
+          }
+
+          create() {
+            this.add.rectangle(0, 0, config.width, config.height, 0x000000, 0.8).setOrigin(0);
+
+            const startButton = this.add.text(0, 0, 'Start Game', { fontSize: '32px', fill: '#FFF' }).setOrigin(0.5);
+            startButton.setInteractive();
+            startButton.on('pointerdown', () => this.scene.start('GameScene'));
+            startButton.setPosition(config.width / 2, config.height / 2);
+
+            this.cameras.main.centerOn(config.width / 2, config.height / 2);
+          }
+        }
+
+        class GameScene extends Phaser.Scene {
+          constructor() {
+            super({ key: 'GameScene' });
+          }
+
+          create() {
+            this.cameras.main.setBounds(0, 0, config.width, config.height);
+
+            snake = new Snake(this);
+            food = new Food(this);
+            cursors = this.input.keyboard.createCursorKeys();
+            scoreText = this.add.text(16, 16, "Score: 0", { fontSize: "32px", fill: "#FFF" });
+            this.cameras.main.setPosition((config.width - this.cameras.main.width) / 2, (config.height - this.cameras.main.height) / 2);
+          }
+
+          update(time) {
+            if (!snake.alive) return;
+
+            const { left, right, up, down } = cursors;
+            const { x, y } = snake.direction;
+
+            if (Phaser.Input.Keyboard.JustDown(left) && x !== GRID_SIZE) {
+              snake.direction = Phaser.Math.Vector2.LEFT;
+            } else if (Phaser.Input.Keyboard.JustDown(right) && x !== -GRID_SIZE) {
+              snake.direction = Phaser.Math.Vector2.RIGHT;
+            } else if (Phaser.Input.Keyboard.JustDown(up) && y !== GRID_SIZE) {
+              snake.direction = Phaser.Math.Vector2.UP;
+            } else if (Phaser.Input.Keyboard.JustDown(down) && y !== -GRID_SIZE) {
+              snake.direction = Phaser.Math.Vector2.DOWN;
+            }
+
+            if (snake.update(time) && snake.collideWithFood(food)) {
+              snake.grow();
+              food.avoidOverlap(snake);
+              updateScore(10);
+            }
+          }
+        }
+
+        const config = {
+          type: Phaser.AUTO,
+          width: 800,
+          height: 600,
+          backgroundColor: "#222222",
+          scene: [BootScene, GameScene],
+        };
+    const game = new Phaser.Game(config);
+
+    let snake;
+    let food;
+    let cursors;
+    let score = 0;
+    let scoreText;
+
+    function snapToGrid(value) {
+      return Math.floor(value / GRID_SIZE) * GRID_SIZE;
+    }
+
+    function updateScore(points) {
+      score += points;
+      scoreText.setText("Score: " + score);
+    }
+
+    class Snake {
+      constructor(scene) {
+        this.scene = scene;
+        this.body = [];
+        this.direction = Phaser.Math.Vector2.RIGHT;
+        this.growAmount = 0;
+        this.moveDelay = 150;
+        this.lastMoveTime = 0;
+        this.alive = true;
+
+        const centerX = snapToGrid(config.width / 2);
+        const centerY = snapToGrid(config.height / 2);
+
+        const randomColor = Phaser.Display.Color.RandomRGB().color32;
+        for (let i = 0; i < 3; ++i) {
+          this.body.push(
+            this.scene.add
+              .rectangle(centerX - i * GRID_SIZE, centerY, GRID_SIZE, GRID_SIZE, randomColor)
+              .setOrigin(0)
+          );
+        }
+      }
+
+      update(time) {
+        if (time >= this.lastMoveTime + this.moveDelay) {
+          this.lastMoveTime = time;
+          return this.move();
+        }
+        return false;
+      }
+
+      move() {
+        const head = this.body[0];
+        const targetX = head.x + this.direction.x * GRID_SIZE;
+        const targetY = head.y + this.direction.y * GRID_SIZE;
+
+        if (
+          targetX < 0 ||
+          targetX >= config.width ||
+          targetY < 0 ||
+          targetY >= config.height
+        ) {
+          this.alive = false;
+          return false;
+        }
+
+        for (let i = this.body.length - 1; i > 0; --i) {
+          if (this.body[i].x === targetX && this.body[i].y === targetY) {
+            this.alive = false;
+            return false;
+          }
+        }
+
+        let last = this.body.pop();
+        last.setPosition(targetX, targetY);
+        this.body.unshift(last);
+
+        if (this.growAmount > 0) {
+          const randomColor = Phaser.Display.Color.RandomRGB().color32;
+          this.body.push(
+            this.scene
+              .add
+              .rectangle(last.x, last.y, GRID_SIZE, GRID_SIZE, randomColor)
+              .setOrigin(0)
+          );
+          this.growAmount--;
+        }
+
+        return true;
+      }
+
+      grow() {
+        this.growAmount += 1;
+      }
+
+      collideWithFood(food) {
+        const head = this.body[0];
+        return head.x === food.x && head.y === food.y;
+      }
+    }
+
+    class Food {
+      constructor(scene) {
+        this.scene = scene;
+        this.x = 0;
+        this.y = 0;
+
+        this.sprite = this.scene.add
+          .rectangle(this.x, this.y, GRID_SIZE, GRID_SIZE, Phaser.Display.Color.RandomRGB().color32)
+          .setOrigin(0);
+
+        this.randomize();
+      }
+
+      randomize() {
+        const maxGridX = (config.width / GRID_SIZE) - 1;
+        const maxGridY = (config.height / GRID_SIZE) - 1;
+
+        this.x = Math.floor(Math.random() * maxGridX) * GRID_SIZE;
+        this.y = Math.floor(Math.random() * maxGridY) * GRID_SIZE;
+
+        this.sprite.setFillStyle(Phaser.Display.Color.RandomRGB().color32);
+        this.sprite.setPosition(this.x, this.y);
+      }
+
+      avoidOverlap(snake) {
+        let overlapping = true;
+
+        while (overlapping) {
+          this.randomize();
+          overlapping = snake.body.some((segment) => segment.x === this.x && segment.y === this.y);
+        }
+      }
+    }
+</script>
+</body>
+</html>
