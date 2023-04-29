@@ -21,6 +21,32 @@ export class GameScene extends Phaser.Scene {
     this.cursors = this.input.keyboard?.createCursorKeys();
     this.scoreText = this.add.text(16, 16, "Score: 0", { fontSize: "32px", color: "#FFF" });
     this.cameras.main.setPosition((config.width - this.cameras.main.width) / 2, (config.height - this.cameras.main.height) / 2);
+
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const touchX = pointer.x;
+      const touchY = pointer.y;
+      const centerX = this.cameras.main.centerX;
+      const centerY = this.cameras.main.centerY;
+  
+      if (!this.snake || !this.snake.alive) return;
+  
+      const dx = touchX - centerX;
+      const dy = touchY - centerY;
+  
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0 && this.snake.direction.x !== -GRID_SIZE) {
+          this.snake.direction = Phaser.Math.Vector2.RIGHT;
+        } else if (dx < 0 && this.snake.direction.x !== GRID_SIZE) {
+          this.snake.direction = Phaser.Math.Vector2.LEFT;
+        }
+      } else {
+        if (dy > 0 && this.snake.direction.y !== -GRID_SIZE) {
+          this.snake.direction = Phaser.Math.Vector2.DOWN;
+        } else if (dy < 0 && this.snake.direction.y !== GRID_SIZE) {
+          this.snake.direction = Phaser.Math.Vector2.UP;
+        }
+      }
+    });  
   }
 
   changeBackgroundColor(): void {
