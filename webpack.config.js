@@ -7,10 +7,6 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: __dirname + '/docs',
-    environment: {
-      module: true,
-    },
-    module: true,
   },
   resolve: {
     extensions: ['.ts', '.js'],
@@ -33,9 +29,6 @@ module.exports = {
     static: path.join(__dirname, 'docs'),
     compress: true,
     port: 9000,
-  },
-  experiments: {
-    outputModule: true,
   },
   externals: {
     phaser: 'Phaser',
