@@ -29,7 +29,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number): void {
-    if (!this.snake?.alive) return;
+    if (!this.snake?.alive) {
+      this.scene.start('GameOverScene');
+      return;
+    }
     if (!this.cursors || !this.food) return;
 
     const { left, right, up, down } = this.cursors;
