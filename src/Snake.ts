@@ -1,4 +1,3 @@
-import { Scene } from 'phaser';
 import { config, GRID_SIZE } from './config';
 import { snapToGrid } from './utility';
 
@@ -11,7 +10,7 @@ export class Snake {
   lastMoveTime
   alive
 
-  constructor(scene: Scene) {
+  constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.body = [];
     this.direction = Phaser.Math.Vector2.RIGHT;

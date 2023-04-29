@@ -37,4 +37,7 @@ module.exports = {
   experiments: {
     outputModule: true,
   },
+  externals: {
+    phaser: 'Phaser',
+  },
 };

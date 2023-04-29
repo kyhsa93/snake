@@ -1,8 +1,6 @@
-import { Scene } from 'phaser';
-
 import { config } from './config';
 
-export class BootScene extends Scene {
+export class BootScene extends Phaser.Scene {
   constructor() {
     super({ key: BootScene.name });
   }
