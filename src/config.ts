@@ -8,6 +8,8 @@ export const config = {
   height: 600,
   backgroundColor: "#222222",
   scene: [BootScene, GameScene, GameOverScene],
+  mode: Phaser.Scale.RESIZE,
+  autoCenter: Phaser.Scale.CENTER_BOTH,
 };
 
 export const GRID_SIZE = 16;
