@@ -79,9 +79,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     if (!this.snake?.alive) {
-      this.scene.start('GameOverScene');
+      const score = this.scoreText ? parseInt(this.scoreText.text.split(' ')[1]) : 0;
+      const elapsedTime = this.timeText ? this.timeText.text : "00:00";
+      this.scene.start('GameOverScene', { score, elapsedTime });
       return;
     }
+
     if (!this.cursors || !this.food) return;
 
     const { left, right, up, down } = this.cursors;
