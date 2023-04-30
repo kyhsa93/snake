@@ -27,26 +27,26 @@ export class GameScene extends Phaser.Scene {
       const touchY = pointer.y;
       const centerX = this.cameras.main.centerX;
       const centerY = this.cameras.main.centerY;
-  
+
       if (!this.snake || !this.snake.alive) return;
-  
+
       const dx = touchX - centerX;
       const dy = touchY - centerY;
-  
+
       if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 0 && this.snake.direction.x !== -GRID_SIZE) {
+        if (dx > 0 && !this.snake.direction.equals(Phaser.Math.Vector2.LEFT)) {
           this.snake.direction = Phaser.Math.Vector2.RIGHT;
-        } else if (dx < 0 && this.snake.direction.x !== GRID_SIZE) {
+        } else if (dx < 0 && !this.snake.direction.equals(Phaser.Math.Vector2.RIGHT)) {
           this.snake.direction = Phaser.Math.Vector2.LEFT;
         }
       } else {
-        if (dy > 0 && this.snake.direction.y !== -GRID_SIZE) {
+        if (dy > 0 && !this.snake.direction.equals(Phaser.Math.Vector2.UP)) {
           this.snake.direction = Phaser.Math.Vector2.DOWN;
-        } else if (dy < 0 && this.snake.direction.y !== GRID_SIZE) {
+        } else if (dy < 0 && !this.snake.direction.equals(Phaser.Math.Vector2.DOWN)) {
           this.snake.direction = Phaser.Math.Vector2.UP;
         }
       }
-    });  
+    });
   }
 
   changeBackgroundColor(): void {
@@ -65,13 +65,17 @@ export class GameScene extends Phaser.Scene {
     const { x, y } = this.snake.direction;
 
     if (Phaser.Input.Keyboard.JustDown(left) && x !== GRID_SIZE) {
-      this.snake.direction = Phaser.Math.Vector2.LEFT;
+      if (this.snake.direction !== Phaser.Math.Vector2.RIGHT)
+        this.snake.direction = Phaser.Math.Vector2.LEFT;
     } else if (Phaser.Input.Keyboard.JustDown(right) && x !== -GRID_SIZE) {
-      this.snake.direction = Phaser.Math.Vector2.RIGHT;
+      if (this.snake.direction !== Phaser.Math.Vector2.LEFT)
+        this.snake.direction = Phaser.Math.Vector2.RIGHT;
     } else if (Phaser.Input.Keyboard.JustDown(up) && y !== GRID_SIZE) {
-      this.snake.direction = Phaser.Math.Vector2.UP;
+      if (this.snake.direction !== Phaser.Math.Vector2.DOWN)
+        this.snake.direction = Phaser.Math.Vector2.UP;
     } else if (Phaser.Input.Keyboard.JustDown(down) && y !== -GRID_SIZE) {
-      this.snake.direction = Phaser.Math.Vector2.DOWN;
+      if (this.snake.direction !== Phaser.Math.Vector2.UP)
+        this.snake.direction = Phaser.Math.Vector2.DOWN;
     }
 
     if (this.snake.update(time) && this.snake.collideWithFood(this.food)) {
