@@ -8,12 +8,16 @@ export class GameScene extends Phaser.Scene {
   food?: Food;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   scoreText?: Phaser.GameObjects.Text;
+  timeText?: Phaser.GameObjects.Text;
+  startTime?: number;
 
   constructor() {
     super({ key: 'GameScene' });
   }
 
   create() {
+    this.timeText = this.add.text(config.width - 100, 16, "00:00", { fontSize: "32px", color: "#FFF" });
+
     this.cameras.main.setBounds(0, 0, config.width, config.height);
 
     this.snake = new Snake(this);
@@ -47,6 +51,17 @@ export class GameScene extends Phaser.Scene {
         }
       }
     });
+
+    this.startTime = this.time.now;
+    this.updateTimeText(0);
+  }
+
+  updateTimeText(elapsedTime: number): void {
+    if (this.timeText) {
+      const minutes = Math.floor(elapsedTime / 60);
+      const seconds = elapsedTime % 60;
+      this.timeText.setText(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    }
   }
 
   changeBackgroundColor(): void {
@@ -55,6 +70,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number): void {
+    if (!this.startTime) this.startTime = this.time.now;
+
     if (!this.snake?.alive) {
       this.scene.start('GameOverScene');
       return;
@@ -83,6 +100,11 @@ export class GameScene extends Phaser.Scene {
       this.food.avoidOverlap(this.snake);
       if (this.scoreText) updateScore(this.scoreText, 10);
       this.changeBackgroundColor();
+    }
+
+    if (this.timeText && this.startTime) {
+      const elapsedTime = Math.floor((this.time.now - this.startTime) / 1000);
+      this.updateTimeText(elapsedTime);
     }
   }
 }
