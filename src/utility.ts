@@ -10,3 +10,8 @@ export function updateScore(scoreText: Phaser.GameObjects.Text, points: number):
   score += points;
   scoreText.setText("Score: " + score);
 }
+
+export function resetScore(scoreText: Phaser.GameObjects.Text): void {
+  score = 0;
+  scoreText.setText("Score: 0")
+}

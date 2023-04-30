@@ -1,6 +1,6 @@
 import { Snake } from './Snake';
 import { Food } from './Food';
-import { updateScore } from './utility';
+import { resetScore, updateScore } from './utility';
 import { config, GRID_SIZE } from './config';
 
 export class GameScene extends Phaser.Scene {
@@ -10,6 +10,7 @@ export class GameScene extends Phaser.Scene {
   scoreText?: Phaser.GameObjects.Text;
   timeText?: Phaser.GameObjects.Text;
   startTime?: number;
+  lastScoreUpdateTime: number = 0;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -53,7 +54,9 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.startTime = this.time.now;
+    this.lastScoreUpdateTime = this.startTime;
     this.updateTimeText(0);
+    resetScore(this.scoreText);
   }
 
   updateTimeText(elapsedTime: number): void {
@@ -70,7 +73,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number): void {
-    if (!this.startTime) this.startTime = this.time.now;
+    if (!this.startTime) {
+      this.startTime = this.time.now;
+      this.lastScoreUpdateTime = this.startTime;
+    }
 
     if (!this.snake?.alive) {
       this.scene.start('GameOverScene');
@@ -105,6 +111,11 @@ export class GameScene extends Phaser.Scene {
     if (this.timeText && this.startTime) {
       const elapsedTime = Math.floor((this.time.now - this.startTime) / 1000);
       this.updateTimeText(elapsedTime);
+    }
+
+    if (this.lastScoreUpdateTime && this.time.now - this.lastScoreUpdateTime >= 1000) {
+      if (this.scoreText) updateScore(this.scoreText, 1);
+      this.lastScoreUpdateTime = this.time.now;
     }
   }
 }
